@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/authApi';
+import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
 
 const LoginForm = () => {
@@ -17,15 +18,8 @@ const LoginForm = () => {
     setError('');
     try {
       await login({ email, password });
-      // Buscar perfil do usuário após login
-      const res = await fetch('/api/v1/users/me', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
-      });
-      if (!res.ok) throw new Error('Erro ao buscar usuário');
-      const user = await res.json();
-      setUser(user);
+      const profile = await getProfile();
+      setUser(profile);
       showToast('Login realizado com sucesso!', 'success');
       navigate('/');
     } catch (err: any) {

@@ -1,29 +1,34 @@
 import httpClient from './httpClient';
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+} from '../types/auth.types';
 
-export const login = async (data: { email: string; password: string }) => {
-  const response = await httpClient.post('/api/v1/auth/login', data);
-  const { access, refresh } = response.data;
-  localStorage.setItem('accessToken', access);
-  localStorage.setItem('refreshToken', refresh);
-  return response;
+export const login = async (data: LoginRequest): Promise<AuthResponse> => {
+  const response = await httpClient.post<AuthResponse>('/api/v1/auth/login', data);
+  const { access_token, refresh_token } = response.data.tokens;
+
+  localStorage.setItem('accessToken', access_token);
+  localStorage.setItem('refreshToken', refresh_token);
+
+  return response.data;
 };
 
-export const register = async (data: {
-  email: string;
-  password: string;
-  name: string;
-}) => {
-  const response = await httpClient.post('/api/v1/auth/register', data);
-  // Se o backend já retorna tokens no registro, salve-os
-  if (response.data.access && response.data.refresh) {
-    localStorage.setItem('accessToken', response.data.access);
-    localStorage.setItem('refreshToken', response.data.refresh);
-  }
-  return response;
+export const register = async (
+  data: RegisterRequest
+): Promise<AuthResponse> => {
+  const response = await httpClient.post<AuthResponse>('/api/v1/auth/register', data);
+  const { access_token, refresh_token } = response.data.tokens;
+
+  localStorage.setItem('accessToken', access_token);
+  localStorage.setItem('refreshToken', refresh_token);
+
+  return response.data;
 };
 
-export const refreshToken = (refresh: string) =>
-  httpClient.post('/api/v1/auth/refresh', { refresh });
+export const refreshToken = (refreshTokenValue: string) =>
+  httpClient.post('/api/v1/auth/refresh', { refresh_token: refreshTokenValue });
 
 export const logout = () => {
   localStorage.removeItem('accessToken');

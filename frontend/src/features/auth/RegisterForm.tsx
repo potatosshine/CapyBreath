@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../../api/authApi';
+import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
 
 const RegisterForm = () => {
@@ -17,16 +18,24 @@ const RegisterForm = () => {
     setLoading(true);
     setError('');
     try {
-      await register({ name, email, password });
-      // Buscar perfil do usuário após registro
-      const res = await fetch('/api/v1/users/me', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-        },
+      const username = name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 50);
+
+      await register({
+        email,
+        password,
+        username: username || `user_${Date.now()}`,
+        full_name: name,
       });
-      if (!res.ok) throw new Error('Erro ao buscar usuário');
-      const user = await res.json();
-      setUser(user);
+
+      const profile = await getProfile();
+      setUser(profile);
       showToast('Conta criada com sucesso!', 'success');
       navigate('/');
     } catch (err: any) {
