@@ -5,14 +5,20 @@ export interface LoginRequest {
 
 export interface RegisterRequest {
   email: string;
-  password: string;
   username: string;
+  password: string;
   full_name?: string;
 }
 
-export interface AuthTokens {
+export interface TokenResponse {
   access_token: string;
   refresh_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+export interface AccessTokenResponse {
+  access_token: string;
   token_type: string;
   expires_in: number;
 }
@@ -25,7 +31,9 @@ export interface AuthUser {
   avatar_url?: string | null;
 }
 
-export interface AuthResponse {
+export interface LoginResponse {
   user: AuthUser;
-  tokens: AuthTokens;
+  tokens: TokenResponse;
 }
+
+export type RegisterResponse = LoginResponse;

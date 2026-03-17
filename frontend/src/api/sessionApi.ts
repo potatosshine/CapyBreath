@@ -1,19 +1,41 @@
 import httpClient from './httpClient';
-import type { Session } from '../types/session.types';
+import type {
+  PaginatedSessionsResponse,
+  SessionCreateRequest,
+  SessionDetail,
+  SessionListItem,
+  SessionQueryParams,
+} from '../types/session.types';
 
-export const getSessions = async (): Promise<Session[]> => {
-  const res = await httpClient.get('/api/v1/sessions');
+export const getSessions = async (
+  params: SessionQueryParams = {}
+): Promise<PaginatedSessionsResponse> => {
+  const res = await httpClient.get<PaginatedSessionsResponse>('/api/v1/sessions', {
+    params: {
+      page: params.page ?? 1,
+      size: params.size ?? 20,
+      order_by: params.order_by ?? 'session_date',
+      order_dir: params.order_dir ?? 'desc',
+    },
+  });
   return res.data;
+};
+
+export const getSessionItems = async (
+  params: SessionQueryParams = {}
+): Promise<SessionListItem[]> => {
+  const data = await getSessions(params);
+  return data.items;
 };
 
 export const createSession = async (
-  data: Partial<Session>
-): Promise<Session> => {
-  const res = await httpClient.post('/api/v1/sessions', data);
+  data: SessionCreateRequest
+): Promise<SessionDetail> => {
+  const res = await httpClient.post<SessionDetail>('/api/v1/sessions', data);
   return res.data;
 };
 
-export const getSessionById = async (id: string): Promise<Session> => {
-  const res = await httpClient.get(`/api/v1/sessions/${id}`);
+export const getSessionById = async (id: string): Promise<SessionDetail> => {
+  const res = await httpClient.get<SessionDetail>(`/api/v1/sessions/${id}`);
   return res.data;
 };

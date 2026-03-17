@@ -1,36 +1,52 @@
 import httpClient from './httpClient';
 import type {
-  AuthResponse,
+  AccessTokenResponse,
   LoginRequest,
+  LoginResponse,
   RegisterRequest,
+  RegisterResponse,
+  TokenResponse,
 } from '../types/auth.types';
 
-export const login = async (data: LoginRequest): Promise<AuthResponse> => {
-  const response = await httpClient.post<AuthResponse>('/api/v1/auth/login', data);
-  const { access_token, refresh_token } = response.data.tokens;
-
-  localStorage.setItem('accessToken', access_token);
-  localStorage.setItem('refreshToken', refresh_token);
-
-  return response.data;
+const storeTokens = (
+  tokens: Pick<TokenResponse, 'access_token' | 'refresh_token'>
+) => {
+  localStorage.setItem('accessToken', tokens.access_token);
+  localStorage.setItem('refreshToken', tokens.refresh_token);
 };
 
-export const register = async (
-  data: RegisterRequest
-): Promise<AuthResponse> => {
-  const response = await httpClient.post<AuthResponse>('/api/v1/auth/register', data);
-  const { access_token, refresh_token } = response.data.tokens;
-
-  localStorage.setItem('accessToken', access_token);
-  localStorage.setItem('refreshToken', refresh_token);
-
-  return response.data;
+export const login = async (data: LoginRequest) => {
+  const response = await httpClient.post<LoginResponse>(
+    '/api/v1/auth/login',
+    data
+  );
+  storeTokens(response.data.tokens);
+  return response;
 };
 
-export const refreshToken = (refreshTokenValue: string) =>
-  httpClient.post('/api/v1/auth/refresh', { refresh_token: refreshTokenValue });
+export const register = async (data: RegisterRequest) => {
+  const response = await httpClient.post<RegisterResponse>(
+    '/api/v1/auth/register',
+    data
+  );
+  storeTokens(response.data.tokens);
+  return response;
+};
 
-export const logout = () => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+export const refreshToken = async (refresh_token: string) => {
+  const response = await httpClient.post<AccessTokenResponse>(
+    '/api/v1/auth/refresh',
+    { refresh_token }
+  );
+  localStorage.setItem('accessToken', response.data.access_token);
+  return response;
+};
+
+export const logout = async () => {
+  try {
+    await httpClient.post('/api/v1/auth/logout');
+  } finally {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
 };

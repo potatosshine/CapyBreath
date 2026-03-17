@@ -1,45 +1,89 @@
 import { useCallback, useState } from 'react';
-import { getAchievements, unlockAchievement } from '../../api/achievementApi';
-import type { Achievement } from '../../types/achievement.types';
+import {
+  checkAchievements,
+  getAchievements,
+  getMyAchievements,
+} from '../../api/achievementApi';
+import { getApiErrorMessage } from '../../api/apiError';
+import type {
+  Achievement,
+  CheckAchievementsResponse,
+  UserAchievementsResponse,
+} from '../../types/achievement.types';
 
 export const useAchievement = () => {
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [catalog, setCatalog] = useState<Achievement[]>([]);
+  const [userAchievements, setUserAchievements] =
+    useState<UserAchievementsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAchievements = useCallback(async () => {
+  const fetchCatalog = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await getAchievements();
-      setAchievements(data);
-    } catch (err) {
-      setError('Erro ao buscar conquistas');
+      setCatalog(data);
+      return data;
+    } catch (error) {
+      const message = getApiErrorMessage(
+        error,
+        'Erro ao buscar catálogo de conquistas'
+      );
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const unlock = useCallback(async (id: string) => {
+  const fetchMyAchievements = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const updated = await unlockAchievement(id);
-      setAchievements(prev => prev.map(a => (a.id === id ? updated : a)));
-      return updated;
-    } catch (err) {
-      setError('Erro ao desbloquear conquista');
-      throw err;
+      const data = await getMyAchievements();
+      setUserAchievements(data);
+      return data;
+    } catch (error) {
+      const message = getApiErrorMessage(
+        error,
+        'Erro ao buscar suas conquistas'
+      );
+      setError(message);
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  const checkAndUnlock =
+    useCallback(async (): Promise<CheckAchievementsResponse> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await checkAchievements();
+        const mine = await getMyAchievements();
+        setUserAchievements(mine);
+        return result;
+      } catch (error) {
+        const message = getApiErrorMessage(
+          error,
+          'Erro ao verificar conquistas'
+        );
+        setError(message);
+        throw new Error(message);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
   return {
-    achievements,
+    catalog,
+    userAchievements,
     loading,
     error,
-    fetchAchievements,
-    unlock,
+    fetchCatalog,
+    fetchMyAchievements,
+    checkAndUnlock,
   };
 };

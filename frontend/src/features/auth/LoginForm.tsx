@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/authApi';
 import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
+import { getApiErrorMessage } from '../../api/apiError';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -18,13 +19,14 @@ const LoginForm = () => {
     setError('');
     try {
       await login({ email, password });
-      const profile = await getProfile();
-      setUser(profile);
+      const user = await getProfile();
+      setUser(user);
       showToast('Login realizado com sucesso!', 'success');
       navigate('/');
-    } catch (err: any) {
-      setError('E-mail ou senha inválidos');
-      showToast('E-mail ou senha inválidos', 'error');
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'E-mail ou senha inválidos');
+      setError(message);
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }

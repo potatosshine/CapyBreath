@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../../api/authApi';
 import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
+import { getApiErrorMessage } from '../../api/apiError';
 
 const RegisterForm = () => {
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,29 +20,24 @@ const RegisterForm = () => {
     setLoading(true);
     setError('');
     try {
-      const username = name
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9_-]/g, '_')
-        .replace(/_+/g, '_')
-        .replace(/^_+|_+$/g, '')
-        .slice(0, 50);
-
       await register({
+        username,
         email,
         password,
-        username: username || `user_${Date.now()}`,
-        full_name: name,
+        full_name: fullName || undefined,
       });
 
-      const profile = await getProfile();
-      setUser(profile);
+      const user = await getProfile();
+      setUser(user);
       showToast('Conta criada com sucesso!', 'success');
       navigate('/');
-    } catch (err: any) {
-      setError('Erro ao registrar. Tente outro e-mail.');
-      showToast('Erro ao registrar. Tente outro e-mail.', 'error');
+    } catch (error) {
+      const message = getApiErrorMessage(
+        error,
+        'Erro ao registrar. Verifique os dados e tente novamente.'
+      );
+      setError(message);
+      showToast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -55,9 +52,16 @@ const RegisterForm = () => {
       {error && <div className="text-red-600 text-sm text-center">{error}</div>}
       <input
         type="text"
-        placeholder="Nome"
-        value={name}
-        onChange={e => setName(e.target.value)}
+        placeholder="Nome completo (opcional)"
+        value={fullName}
+        onChange={e => setFullName(e.target.value)}
+        className="border rounded px-3 py-2"
+      />
+      <input
+        type="text"
+        placeholder="Nome de usuário"
+        value={username}
+        onChange={e => setUsername(e.target.value)}
         className="border rounded px-3 py-2"
         required
         autoFocus

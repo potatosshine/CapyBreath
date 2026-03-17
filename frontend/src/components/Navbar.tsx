@@ -1,10 +1,8 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuthContext } from '../features/auth/AuthProvider';
 
 const Navbar = () => {
   const { user, logout } = useAuthContext();
-  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -49,11 +47,10 @@ const Navbar = () => {
         </Link>
       </div>
       <div className="flex items-center gap-4">
-        <span className="font-semibold">{user.name}</span>
+        <span className="font-semibold">{user.full_name || user.username}</span>
         <button
           onClick={() => {
-            logout();
-            navigate('/login');
+            void logout();
           }}
           className="bg-white text-capy-primary font-bold px-3 py-1 rounded hover:bg-gray-100 transition"
         >

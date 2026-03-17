@@ -12,7 +12,6 @@ import App from './App';
 import SessionPage from './pages/SessionPage';
 import AchievementsPage from './pages/AchievementsPage';
 import ProfilePage from './pages/ProfilePage';
-import Navbar from './components/Navbar';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
