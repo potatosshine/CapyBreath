@@ -4,6 +4,7 @@ import { login } from '../../api/authApi';
 import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
 import { getApiErrorMessage } from '../../api/apiError';
+import { migrateAnonymousSessions } from '../../utils/localSessionStorage';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -21,7 +22,25 @@ const LoginForm = () => {
       await login({ email, password });
       const user = await getProfile();
       setUser(user);
-      showToast('Login realizado com sucesso!', 'success');
+
+      const { migratedCount, failedCount } = await migrateAnonymousSessions();
+
+      if (migratedCount > 0) {
+        showToast(
+          `${migratedCount} sessão(ões) anônima(s) migrada(s) com sucesso!`,
+          'success'
+        );
+      } else if (!failedCount) {
+        showToast('Login realizado com sucesso!', 'success');
+      }
+
+      if (failedCount > 0) {
+        showToast(
+          `${failedCount} sessão(ões) local(is) não puderam ser migradas agora.`,
+          'info'
+        );
+      }
+
       navigate('/');
     } catch (error) {
       const message = getApiErrorMessage(error, 'E-mail ou senha inválidos');

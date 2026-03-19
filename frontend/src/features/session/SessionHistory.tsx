@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getSessions } from '../../api/sessionApi';
 import type { SessionListItem } from '../../types/session.types';
@@ -36,10 +37,11 @@ const SessionHistory = () => {
         <>
           <ul className="divide-y">
             {sessions.map(s => (
-              <li
-                key={s.id}
-                className="py-3 flex flex-col md:flex-row md:items-center md:gap-4"
-              >
+              <li key={s.id}>
+                <Link
+                  to={`/session/${s.id}`}
+                  className="py-3 flex flex-col md:flex-row md:items-center md:gap-4 hover:bg-gray-50 rounded px-2 transition"
+                >
                 <span className="font-mono text-xs text-gray-500">
                   {new Date(s.session_date).toLocaleString('pt-BR')}
                 </span>
@@ -54,6 +56,7 @@ const SessionHistory = () => {
                     🏆 Personal Best
                   </span>
                 )}
+                </Link>
               </li>
             ))}
           </ul>

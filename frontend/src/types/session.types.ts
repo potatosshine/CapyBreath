@@ -47,6 +47,12 @@ export interface SessionCreateRequest {
   technique_variant?: 'standard' | 'advanced' | 'beginner' | 'power';
 }
 
+export interface SessionUpdateRequest {
+  notes?: string | null;
+  mood_before?: number | null;
+  mood_after?: number | null;
+}
+
 export interface SessionQueryParams {
   page?: number;
   size?: number;

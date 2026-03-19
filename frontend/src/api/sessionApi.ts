@@ -5,6 +5,7 @@ import type {
   SessionDetail,
   SessionListItem,
   SessionQueryParams,
+  SessionUpdateRequest,
 } from '../types/session.types';
 
 export const getSessions = async (
@@ -38,4 +39,16 @@ export const createSession = async (
 export const getSessionById = async (id: string): Promise<SessionDetail> => {
   const res = await httpClient.get<SessionDetail>(`/api/v1/sessions/${id}`);
   return res.data;
+};
+
+export const updateSession = async (
+  id: string,
+  data: SessionUpdateRequest
+): Promise<SessionDetail> => {
+  const res = await httpClient.patch<SessionDetail>(`/api/v1/sessions/${id}`, data);
+  return res.data;
+};
+
+export const deleteSession = async (id: string): Promise<void> => {
+  await httpClient.delete(`/api/v1/sessions/${id}`);
 };

@@ -12,6 +12,7 @@ import App from './App';
 import SessionPage from './pages/SessionPage';
 import AchievementsPage from './pages/AchievementsPage';
 import ProfilePage from './pages/ProfilePage';
+import SessionDetailPage from './pages/SessionDetailPage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -34,6 +35,14 @@ createRoot(document.getElementById('root')!).render(
             element={
               <PrivateRoute>
                 <SessionPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/session/:id"
+            element={
+              <PrivateRoute>
+                <SessionDetailPage />
               </PrivateRoute>
             }
           />

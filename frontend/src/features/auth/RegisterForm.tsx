@@ -4,6 +4,7 @@ import { register } from '../../api/authApi';
 import { getProfile } from '../../api/userApi';
 import { useAuthContext } from './AuthProvider';
 import { getApiErrorMessage } from '../../api/apiError';
+import { migrateAnonymousSessions } from '../../utils/localSessionStorage';
 
 const RegisterForm = () => {
   const [fullName, setFullName] = useState('');
@@ -29,7 +30,25 @@ const RegisterForm = () => {
 
       const user = await getProfile();
       setUser(user);
-      showToast('Conta criada com sucesso!', 'success');
+
+      const { migratedCount, failedCount } = await migrateAnonymousSessions();
+
+      if (migratedCount > 0) {
+        showToast(
+          `Conta criada e ${migratedCount} sessão(ões) local(is) migrada(s)!`,
+          'success'
+        );
+      } else if (!failedCount) {
+        showToast('Conta criada com sucesso!', 'success');
+      }
+
+      if (failedCount > 0) {
+        showToast(
+          `${failedCount} sessão(ões) local(is) não puderam ser migradas agora.`,
+          'info'
+        );
+      }
+
       navigate('/');
     } catch (error) {
       const message = getApiErrorMessage(

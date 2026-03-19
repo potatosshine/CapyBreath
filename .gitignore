@@ -86,3 +86,5 @@ redis_data/
 
 # Docker override files (personal configs)
 docker-compose.override.yml
+
+docs/
