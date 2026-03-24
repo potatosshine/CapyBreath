@@ -71,7 +71,7 @@ class RedisCache:
         try:
             json_str = json.dumps(value)
             return await self.set(key, json_str, ttl)
-        except (TypeError, json.JSONEncodeError) as e:
+        except (TypeError, ValueError) as e:
             print(f"JSON serialization error: {e}")
             return False
         
