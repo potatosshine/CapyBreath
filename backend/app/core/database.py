@@ -4,8 +4,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker
 )
-from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
+from app.models.base import Base
+from app import models as app_models
 
 engine = create_async_engine(
     settings.database_url,
@@ -25,9 +26,6 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False
 )
 
-class Base(DeclarativeBase):
-    pass
-
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
@@ -41,6 +39,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 async def init_db() -> None:
+    # Garante registro dos models na metadata antes do create_all
+    _ = app_models
+
     async with engine.begin() as conn:
         # nao usar em producao - apenas para criar tabelas
         await conn.run_sync(Base.metadata.create_all)
