@@ -44,11 +44,8 @@ const AchievementList = () => {
   const [rarity, setRarity] = useState<AchievementRarity | 'all'>('all');
 
   useEffect(() => {
-    void Promise.all([
-      fetchCatalog({ category: 'all', rarity: 'all' }),
-      fetchMyAchievements(),
-    ]);
-  }, [fetchCatalog, fetchMyAchievements]);
+    void fetchMyAchievements();
+  }, [fetchMyAchievements]);
 
   useEffect(() => {
     void fetchCatalog({ category, rarity });
