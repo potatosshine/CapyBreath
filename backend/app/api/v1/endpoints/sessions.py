@@ -59,7 +59,7 @@ async def list_my_sessions(
     page: int = Query(1, ge=1, description="Número da página"),
     size: int = Query(20, ge=1, le=100, description="Itens por página"),
     order_by: str = Query("session_date", description="Campo para ordenar"),
-    order_dir: str = Query("desc", regex="^(asc|desc)$")
+    order_dir: str = Query("desc", pattern="^(asc|desc)$")
 ):
     skip = (page - 1) * size
     
