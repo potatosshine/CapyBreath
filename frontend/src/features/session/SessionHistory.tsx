@@ -9,16 +9,19 @@ const SessionHistory = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSessions() {
       setLoading(true);
+      setError(null);
       try {
         const data = await getSessions({ page, size: 10 });
         setSessions(data.items);
         setPages(data.pages);
       } catch (error) {
-        console.error(getApiErrorMessage(error, 'Erro ao carregar dados.'));
+        setSessions([]);
+        setError(getApiErrorMessage(error, 'Erro ao carregar histórico de sessões.'));
       } finally {
         setLoading(false);
       }
@@ -31,6 +34,10 @@ const SessionHistory = () => {
       <h1 className="text-2xl font-bold mb-4">Histórico de Sessões</h1>
       {loading ? (
         <div>Carregando sessões...</div>
+      ) : error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+          {error}
+        </div>
       ) : sessions.length === 0 ? (
         <div>Nenhuma sessão encontrada.</div>
       ) : (
