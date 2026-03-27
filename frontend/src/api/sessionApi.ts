@@ -3,6 +3,7 @@ import type {
   MoodCorrelationResponse,
   PaginatedSessionsResponse,
   ProgressResponse,
+  Session,
   SessionCreateRequest,
   SessionDetail,
   SessionListItem,
@@ -50,8 +51,8 @@ export const getSessionById = async (id: string): Promise<SessionDetail> => {
 export const updateSession = async (
   id: string,
   data: SessionUpdateRequest
-): Promise<SessionDetail> => {
-  const res = await httpClient.patch<SessionDetail>(
+): Promise<Session> => {
+  const res = await httpClient.patch<Session>(
     `/api/v1/sessions/${id}`,
     data
   );
