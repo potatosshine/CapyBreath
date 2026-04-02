@@ -23,11 +23,12 @@ export function useBreathingSession() {
   const [tempoRetencaoFinal, setTempoRetencaoFinal] = useState(0);
   const [pausada, setPausada] = useState(false);
   const [isInhaling, setIsInhaling] = useState(false);
+  const [aguardandoRetencao, setAguardandoRetencao] = useState(false);
 
   const tempoCicloRespiracao = TEMPO_INSPIRACAO + TEMPO_EXPIRACAO;
 
   useEffect(() => {
-    if (fase !== 'respiracao' || pausada) return;
+    if (fase !== 'respiracao' || pausada || aguardandoRetencao) return;
 
     const animationTimer = setInterval(() => {
       setIsInhaling(prev => !prev);
@@ -35,12 +36,14 @@ export function useBreathingSession() {
 
     const countTimer = setInterval(() => {
       setRespiracaoAtual(prev => {
-        const proxima = prev + 1;
+        const { proxima, deveIrParaRetencao } = calcularProximaRespiracao(
+          prev,
+          RESPIRACOES_PADRAO
+        );
 
-        if (proxima >= RESPIRACOES_PADRAO) {
-          setFase('retencao');
+        if (deveIrParaRetencao) {
           setIsInhaling(false);
-          return prev;
+          setAguardandoRetencao(true);
         }
 
         return proxima;
@@ -51,7 +54,18 @@ export function useBreathingSession() {
       clearInterval(animationTimer);
       clearInterval(countTimer);
     };
-  }, [fase, pausada, tempoCicloRespiracao]);
+  }, [fase, pausada, tempoCicloRespiracao, aguardandoRetencao]);
+
+  useEffect(() => {
+    if (fase !== 'respiracao' || !aguardandoRetencao || pausada) return;
+
+    const transitionTimer = setTimeout(() => {
+      setFase('retencao');
+      setAguardandoRetencao(false);
+    }, TEMPO_EXPIRACAO);
+
+    return () => clearTimeout(transitionTimer);
+  }, [fase, aguardandoRetencao, pausada]);
 
   useEffect(() => {
     if (fase !== 'retencao' || pausada) return;
@@ -87,6 +101,7 @@ export function useBreathingSession() {
     setTempoRetencaoFinal(0);
     setPausada(false);
     setIsInhaling(false);
+    setAguardandoRetencao(false);
   }, []);
 
   const togglePausa = useCallback(() => {
@@ -100,6 +115,7 @@ export function useBreathingSession() {
     setTempoRetencaoFinal(0);
     setPausada(false);
     setIsInhaling(false);
+    setAguardandoRetencao(false);
   }, []);
 
   const proximaFase = useCallback(() => {
@@ -125,5 +141,17 @@ export function useBreathingSession() {
     togglePausa,
     pararSessao,
     proximaFase,
+  };
+}
+
+export function calcularProximaRespiracao(
+  respiracaoAtual: number,
+  totalRespiracoes: number
+) {
+  const proxima = Math.min(respiracaoAtual + 1, totalRespiracoes);
+
+  return {
+    proxima,
+    deveIrParaRetencao: proxima === totalRespiracoes,
   };
 }
