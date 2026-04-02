@@ -22,6 +22,9 @@ import type { UnlockedAchievement } from './types/achievement.types';
 function App() {
   const {
     fase,
+    roundAtual,
+    totalRounds,
+    retencoesPorRound,
     respiracaoAtual,
     totalRespiracoes,
     tempoRetencao,
@@ -41,23 +44,25 @@ function App() {
   const [newAchievements, setNewAchievements] = useState<UnlockedAchievement[]>([]);
   const handledFinalizationRef = useRef(false);
 
-  const sessionPayload = useMemo<SessionCreateRequest | null>(() => {
-    if (fase !== 'finalizada' || tempoRetencaoFinal <= 0) {
-      return null;
+  const sessionPayloads = useMemo<SessionCreateRequest[]>(() => {
+    if (fase !== 'finalizada' || retencoesPorRound.length === 0) {
+      return [];
     }
 
     const breathingDurationSeconds =
       totalRespiracoes * ((TEMPO_INSPIRACAO + TEMPO_EXPIRACAO) / 1000);
 
-    return {
-      breaths_count: totalRespiracoes,
-      retention_time: tempoRetencaoFinal,
-      recovery_time: TEMPO_RECUPERACAO / 1000,
-      duration_seconds:
-        breathingDurationSeconds + tempoRetencaoFinal + TEMPO_RECUPERACAO / 1000,
-      technique_variant: 'standard',
-    };
-  }, [fase, tempoRetencaoFinal, totalRespiracoes]);
+    return retencoesPorRound
+      .filter(retencao => retencao > 0)
+      .map(retencao => ({
+        breaths_count: totalRespiracoes,
+        retention_time: retencao,
+        recovery_time: TEMPO_RECUPERACAO / 1000,
+        duration_seconds:
+          breathingDurationSeconds + retencao + TEMPO_RECUPERACAO / 1000,
+        technique_variant: 'standard',
+      }));
+  }, [fase, retencoesPorRound, totalRespiracoes]);
 
   useEffect(() => {
     if (fase !== 'finalizada') {
@@ -66,7 +71,7 @@ function App() {
       return;
     }
 
-    if (!sessionPayload || handledFinalizationRef.current) {
+    if (!sessionPayloads.length || handledFinalizationRef.current) {
       return;
     }
 
@@ -80,7 +85,7 @@ function App() {
       setNewAchievements([]);
 
       if (!isAuthenticated) {
-        saveAnonymousSession(sessionPayload);
+        sessionPayloads.forEach(payload => saveAnonymousSession(payload));
         setSessionSavedLocally(true);
         setSavingSession(false);
         showToast('Sessão salva temporariamente neste dispositivo.', 'info');
@@ -91,7 +96,7 @@ function App() {
         const before = await getMyAchievements();
         const previousIds = new Set(before.unlocked.map(item => item.id));
 
-        await createSession(sessionPayload);
+        await Promise.all(sessionPayloads.map(payload => createSession(payload)));
 
         const after = await getMyAchievements();
         const unlockedNow = after.unlocked.filter(item => !previousIds.has(item.id));
@@ -112,7 +117,7 @@ function App() {
     };
 
     void persistSession();
-  }, [fase, isAuthenticated, sessionPayload, showToast]);
+  }, [fase, isAuthenticated, sessionPayloads, showToast]);
 
   const handleStartSession = () => {
     setSessionSaved(false);
@@ -152,6 +157,10 @@ function App() {
                 <span className="mr-3">3️⃣</span>
                 <span>Recuperação: inspire fundo e segure 15s</span>
               </li>
+              <li className="flex items-start">
+                <span className="mr-3">🔁</span>
+                <span>3 rounds por sessão (padrão)</span>
+              </li>
             </ul>
           </div>
 
@@ -174,6 +183,11 @@ function App() {
           🦫 CapyBreath
         </h1>
         <p className="text-white/80 text-lg">{MENSAGENS[fase]}</p>
+        {fase !== 'finalizada' && (
+          <p className="text-white/70 text-sm mt-2">
+            Round {roundAtual} de {totalRounds}
+          </p>
+        )}
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center space-y-8 w-full max-w-2xl">
@@ -217,6 +231,20 @@ function App() {
               </p>
               <Timer segundos={tempoRetencaoFinal} />
             </div>
+
+            {retencoesPorRound.length > 0 && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-left max-w-xl mx-auto">
+                <h3 className="text-white font-semibold mb-3">Retenção por round</h3>
+                <ul className="space-y-2">
+                  {retencoesPorRound.map((valor, index) => (
+                    <li key={`round-${index + 1}`} className="flex justify-between text-white/90">
+                      <span>Round {index + 1}</span>
+                      <span className="font-bold">{valor}s</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 text-left text-white shadow-lg max-w-xl mx-auto">
               <h3 className="text-xl font-bold mb-3">Resumo da sessão</h3>

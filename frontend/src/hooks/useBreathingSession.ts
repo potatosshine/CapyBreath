@@ -17,10 +17,13 @@ import {
  * 4. FINALIZADA: Mostra resultado
  */
 export function useBreathingSession() {
+  const totalRounds = 3;
   const [fase, setFase] = useState<FaseSessao>('inicio');
   const [respiracaoAtual, setRespiracaoAtual] = useState(0);
   const [tempoRetencao, setTempoRetencao] = useState(0);
   const [tempoRetencaoFinal, setTempoRetencaoFinal] = useState(0);
+  const [roundAtual, setRoundAtual] = useState(1);
+  const [retencoesPorRound, setRetencoesPorRound] = useState<number[]>([]);
   const [pausada, setPausada] = useState(false);
   const [isInhaling, setIsInhaling] = useState(false);
   const [aguardandoRetencao, setAguardandoRetencao] = useState(false);
@@ -87,18 +90,35 @@ export function useBreathingSession() {
       setTempoRetencao(tempoRestante);
 
       if (tempoRestante <= 0) {
-        setFase('finalizada');
+        clearInterval(timer);
+        setRetencoesPorRound(prev => [...prev, tempoRetencaoFinal]);
+
+        setRoundAtual(prevRound => {
+          if (prevRound < totalRounds) {
+            setRespiracaoAtual(0);
+            setTempoRetencao(0);
+            setTempoRetencaoFinal(0);
+            setIsInhaling(false);
+            setFase('respiracao');
+            return prevRound + 1;
+          }
+
+          setFase('finalizada');
+          return prevRound;
+        });
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [fase, pausada]);
+  }, [fase, pausada, tempoRetencaoFinal, totalRounds]);
 
   const iniciarSessao = useCallback(() => {
     setFase('respiracao');
     setRespiracaoAtual(0);
     setTempoRetencao(0);
     setTempoRetencaoFinal(0);
+    setRoundAtual(1);
+    setRetencoesPorRound([]);
     setPausada(false);
     setIsInhaling(false);
     setAguardandoRetencao(false);
@@ -113,6 +133,8 @@ export function useBreathingSession() {
     setRespiracaoAtual(0);
     setTempoRetencao(0);
     setTempoRetencaoFinal(0);
+    setRoundAtual(1);
+    setRetencoesPorRound([]);
     setPausada(false);
     setIsInhaling(false);
     setAguardandoRetencao(false);
@@ -129,6 +151,9 @@ export function useBreathingSession() {
 
   return {
     fase,
+    roundAtual,
+    totalRounds,
+    retencoesPorRound,
     respiracaoAtual,
     totalRespiracoes: RESPIRACOES_PADRAO,
     tempoRetencao,
