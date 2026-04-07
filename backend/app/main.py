@@ -39,11 +39,6 @@ async def lifespan(app: FastAPI):
     # Conecta ao Redis
     await init_redis()
     logger.info(
-        "redis_connected",
-        extra={"event_data": {"event": "redis_connected"}}
-    )
-    
-    logger.info(
         "startup_complete",
         extra={"event_data": {
             "event": "app_startup_complete",
@@ -123,23 +118,29 @@ async def structured_request_logging(request, call_next):
     request_id = str(uuid.uuid4())
     request.state.request_id = request_id
 
-    response = await call_next(request)
+    response = None
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    latency_ms = round((time.perf_counter() - started_at) * 1000, 2)
-    response.headers["X-Request-ID"] = request_id
-    logger.info(
-        "http_request",
-        extra={"event_data": {
-            "event": "http_request",
-            "request_id": request_id,
-            "user_id": None,
-            "ip": request.client.host if request.client else None,
-            "path": request.url.path,
-            "status_code": response.status_code,
-            "latency_ms": latency_ms
-        }}
-    )
-    return response
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        response.headers["X-Request-ID"] = request_id
+        return response
+    finally:
+        latency_ms = round((time.perf_counter() - started_at) * 1000, 2)
+        request.state.latency_ms = latency_ms
+        logger.info(
+            "http_request",
+            extra={"event_data": {
+                "event": "http_request",
+                "request_id": request_id,
+                "user_id": None,
+                "ip": request.client.host if request.client else None,
+                "path": request.url.path,
+                "status_code": status_code,
+                "latency_ms": latency_ms
+            }}
+        )
 
 
 # root endpoints

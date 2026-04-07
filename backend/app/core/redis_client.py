@@ -6,6 +6,13 @@ from redis.exceptions import RedisError
 from app.core.config import settings
 logger = logging.getLogger("app.redis")
 
+def _sanitize_cache_identifier(value: str) -> str:
+    if ":" in value:
+        return f"{value.split(':', maxsplit=1)[0]}:***"
+    if len(value) <= 6:
+        return "***"
+    return f"{value[:3]}***{value[-3:]}"
+
 # redis connection pool
 redis_pool = ConnectionPool.from_url(
     settings.redis_url,
@@ -45,7 +52,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_get_error",
-                extra={"event_data": {"event": "redis_get_error", "key": key}}
+                extra={"event_data": {"event": "redis_get_error", "key": _sanitize_cache_identifier(key)}}
             )
             return None
     
@@ -66,7 +73,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_set_error",
-                extra={"event_data": {"event": "redis_set_error", "key": key}}
+                extra={"event_data": {"event": "redis_set_error", "key": _sanitize_cache_identifier(key)}}
             )
             return False
         
@@ -104,7 +111,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_delete_error",
-                extra={"event_data": {"event": "redis_delete_error", "key": key}}
+                extra={"event_data": {"event": "redis_delete_error", "key": _sanitize_cache_identifier(key)}}
             )
             return False
     
@@ -116,7 +123,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_exists_error",
-                extra={"event_data": {"event": "redis_exists_error", "key": key}}
+                extra={"event_data": {"event": "redis_exists_error", "key": _sanitize_cache_identifier(key)}}
             )
             return False
         
@@ -128,7 +135,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_expire_error",
-                extra={"event_data": {"event": "redis_expire_error", "key": key}}
+                extra={"event_data": {"event": "redis_expire_error", "key": _sanitize_cache_identifier(key)}}
             )
             return False
         
@@ -140,7 +147,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_ttl_error",
-                extra={"event_data": {"event": "redis_ttl_error", "key": key}}
+                extra={"event_data": {"event": "redis_ttl_error", "key": _sanitize_cache_identifier(key)}}
             )
             return -2  # key does not exist
         
@@ -152,7 +159,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_incrby_error",
-                extra={"event_data": {"event": "redis_incrby_error", "key": key}}
+                extra={"event_data": {"event": "redis_incrby_error", "key": _sanitize_cache_identifier(key)}}
             )
             return 0
         
@@ -170,7 +177,7 @@ class RedisCache:
         except RedisError:
             logger.error(
                 "redis_delete_pattern_error",
-                extra={"event_data": {"event": "redis_delete_pattern_error", "pattern": pattern}}
+                extra={"event_data": {"event": "redis_delete_pattern_error", "pattern": _sanitize_cache_identifier(pattern)}}
             )
             return 0
 
