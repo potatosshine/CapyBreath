@@ -40,3 +40,27 @@ Os endpoints abaixo estão expostos, mas marcados como `deprecated` no OpenAPI p
 - `GET /api/v1/auth/me`
 
 Isso reduz ambiguidade de uso até integração futura ou remoção definitiva.
+
+## Feature flags de segurança (CB-SEC-001)
+
+As flags abaixo são lidas por variáveis de ambiente com defaults explícitos em `app/core/config.py`:
+
+- `SECURE_COOKIES_ENABLED` (default: `false`)
+- `STRICT_CORS_ENABLED` (default: `false`)
+- `AUTH_DUAL_MODE_ENABLED` (default: `false`)
+- `CSP_REPORT_ONLY_ENABLED` (default: `true`)
+
+### Sugestão por ambiente
+
+- **dev**: `SECURE_COOKIES_ENABLED=false`, `STRICT_CORS_ENABLED=false`, `AUTH_DUAL_MODE_ENABLED=false`, `CSP_REPORT_ONLY_ENABLED=true`
+- **staging**: `SECURE_COOKIES_ENABLED=true`, `STRICT_CORS_ENABLED=true`, `AUTH_DUAL_MODE_ENABLED=true`, `CSP_REPORT_ONLY_ENABLED=true`
+- **prod**: `SECURE_COOKIES_ENABLED=true`, `STRICT_CORS_ENABLED=true`, `AUTH_DUAL_MODE_ENABLED=true`, `CSP_REPORT_ONLY_ENABLED=false`
+
+### Exemplo `.env`
+
+```env
+SECURE_COOKIES_ENABLED=true
+STRICT_CORS_ENABLED=true
+AUTH_DUAL_MODE_ENABLED=true
+CSP_REPORT_ONLY_ENABLED=true
+```

@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
     refresh_token_expire_days: int = 7
+    secure_cookies_enabled: bool = False
+    auth_dual_mode_enabled: bool = False
+    csp_report_only_enabled: bool = True
+    strict_cors_enabled: bool = False
 
     #cors
     cors_origins: str
@@ -53,6 +57,24 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]
+
+    @property
+    def cors_allow_methods(self) -> list[str]:
+        if self.strict_cors_enabled:
+            return ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+        return ["*"]
+
+    @property
+    def cors_allow_headers(self) -> list[str]:
+        if self.strict_cors_enabled:
+            return ["Authorization", "Content-Type", "X-Request-ID"]
+        return ["*"]
+
+    @property
+    def cors_expose_headers(self) -> list[str]:
+        if self.strict_cors_enabled:
+            return ["X-Request-ID"]
+        return ["*"]
 
     @property
     def database_url(self) -> str:

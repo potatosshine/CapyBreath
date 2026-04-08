@@ -43,7 +43,13 @@ async def lifespan(app: FastAPI):
         extra={"event_data": {
             "event": "app_startup_complete",
             "app": settings.app_name,
-            "version": settings.app_version
+            "version": settings.app_version,
+            "security_flags": {
+                "SECURE_COOKIES_ENABLED": settings.secure_cookies_enabled,
+                "STRICT_CORS_ENABLED": settings.strict_cors_enabled,
+                "AUTH_DUAL_MODE_ENABLED": settings.auth_dual_mode_enabled,
+                "CSP_REPORT_ONLY_ENABLED": settings.csp_report_only_enabled
+            }
         }}
     )
     
@@ -99,9 +105,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,  # ["http://localhost:5173", ...]
     allow_credentials=True,
-    allow_methods=["*"],  # GET, POST, PUT, DELETE, PATCH, OPTIONS
-    allow_headers=["*"],  # Authorization, Content-Type, etc.
-    expose_headers=["*"]
+    allow_methods=settings.cors_allow_methods,
+    allow_headers=settings.cors_allow_headers,
+    expose_headers=settings.cors_expose_headers
 )
 
 
