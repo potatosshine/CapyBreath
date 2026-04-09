@@ -18,6 +18,20 @@ export interface SessionDetail extends Session {
   is_personal_best: boolean;
 }
 
+export interface SessionUnlockedAchievement {
+  achievement_id: string;
+  name: string;
+  description: string;
+  icon: string;
+  points: number;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  unlocked_at: string;
+}
+
+export interface SessionCreateResponse extends SessionDetail {
+  newly_unlocked: SessionUnlockedAchievement[];
+}
+
 export interface SessionListItem {
   id: string;
   breaths_count: number;

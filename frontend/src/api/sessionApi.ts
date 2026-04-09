@@ -5,6 +5,7 @@ import type {
   ProgressResponse,
   Session,
   SessionCreateRequest,
+  SessionCreateResponse,
   SessionDetail,
   SessionListItem,
   SessionQueryParams,
@@ -38,8 +39,8 @@ export const getSessionItems = async (
 
 export const createSession = async (
   data: SessionCreateRequest
-): Promise<SessionDetail> => {
-  const res = await httpClient.post<SessionDetail>('/api/v1/sessions', data);
+): Promise<SessionCreateResponse> => {
+  const res = await httpClient.post<SessionCreateResponse>('/api/v1/sessions', data);
   return res.data;
 };
 

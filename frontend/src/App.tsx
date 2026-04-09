@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import BreathingCircle from './components/BreathingCircle';
 import BreathCounter from './components/BreathCounter';
 import Timer from './components/Timer';
-import { getMyAchievements } from './api/achievementApi';
 import { createSession } from './api/sessionApi';
 import { getApiErrorMessage } from './api/apiError';
 import { useAuthContext } from './features/auth/AuthProvider';
@@ -16,8 +15,10 @@ import {
   TEMPO_RECUPERACAO,
 } from './constants/breathing.constants';
 import { saveAnonymousSession } from './utils/localSessionStorage';
-import type { SessionCreateRequest } from './types/session.types';
-import type { UnlockedAchievement } from './types/achievement.types';
+import type {
+  SessionCreateRequest,
+  SessionUnlockedAchievement,
+} from './types/session.types';
 
 function App() {
   const {
@@ -41,7 +42,9 @@ function App() {
   const [sessionSaved, setSessionSaved] = useState(false);
   const [sessionSavedLocally, setSessionSavedLocally] = useState(false);
   const [sessionError, setSessionError] = useState<string | null>(null);
-  const [newAchievements, setNewAchievements] = useState<UnlockedAchievement[]>([]);
+  const [newAchievements, setNewAchievements] = useState<
+    SessionUnlockedAchievement[]
+  >([]);
   const handledFinalizationRef = useRef(false);
 
   const sessionPayloads = useMemo<SessionCreateRequest[]>(() => {
@@ -93,13 +96,16 @@ function App() {
       }
 
       try {
-        const before = await getMyAchievements();
-        const previousIds = new Set(before.unlocked.map(item => item.id));
-
-        await Promise.all(sessionPayloads.map(payload => createSession(payload)));
-
-        const after = await getMyAchievements();
-        const unlockedNow = after.unlocked.filter(item => !previousIds.has(item.id));
+        const responses = await Promise.all(
+          sessionPayloads.map(payload => createSession(payload))
+        );
+        const unlockedMap = new Map<string, SessionUnlockedAchievement>();
+        responses.forEach(response => {
+          response.newly_unlocked.forEach(achievement => {
+            unlockedMap.set(achievement.achievement_id, achievement);
+          });
+        });
+        const unlockedNow = Array.from(unlockedMap.values());
 
         setSessionSaved(true);
         setNewAchievements(unlockedNow);
@@ -234,10 +240,15 @@ function App() {
 
             {retencoesPorRound.length > 0 && (
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-left max-w-xl mx-auto">
-                <h3 className="text-white font-semibold mb-3">Retenção por round</h3>
+                <h3 className="text-white font-semibold mb-3">
+                  Retenção por round
+                </h3>
                 <ul className="space-y-2">
                   {retencoesPorRound.map((valor, index) => (
-                    <li key={`round-${index + 1}`} className="flex justify-between text-white/90">
+                    <li
+                      key={`round-${index + 1}`}
+                      className="flex justify-between text-white/90"
+                    >
                       <span>Round {index + 1}</span>
                       <span className="font-bold">{valor}s</span>
                     </li>
@@ -265,7 +276,8 @@ function App() {
                     Sessão salva temporariamente neste dispositivo.
                   </p>
                   <p className="text-white/80 text-sm">
-                    Faça login ou crie sua conta para migrar essa sessão automaticamente e manter seu histórico.
+                    Faça login ou crie sua conta para migrar essa sessão
+                    automaticamente e manter seu histórico.
                   </p>
                   <div className="flex flex-wrap gap-3 pt-1">
                     <Link
@@ -288,34 +300,39 @@ function App() {
                 <p className="text-red-200 font-medium">{sessionError}</p>
               )}
 
-              {!savingSession && isAuthenticated && newAchievements.length > 0 && (
-                <div className="mt-4 rounded-xl bg-emerald-500/20 border border-emerald-300/30 p-4">
-                  <p className="font-bold text-emerald-100 mb-3">
-                    🏆 Novas conquistas desbloqueadas
-                  </p>
-                  <ul className="space-y-2">
-                    {newAchievements.map(achievement => (
-                      <li key={achievement.id} className="rounded-lg bg-black/10 p-3">
-                        <div className="font-semibold">
-                          {achievement.icon} {achievement.name}
-                        </div>
-                        <div className="text-sm text-white/80">
-                          {achievement.description}
-                        </div>
-                        <div className="text-xs text-emerald-100 mt-1">
-                          +{achievement.points} pts • {achievement.rarity}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    to="/achievements"
-                    className="inline-flex mt-4 rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition"
-                  >
-                    Ver conquistas
-                  </Link>
-                </div>
-              )}
+              {!savingSession &&
+                isAuthenticated &&
+                newAchievements.length > 0 && (
+                  <div className="mt-4 rounded-xl bg-emerald-500/20 border border-emerald-300/30 p-4">
+                    <p className="font-bold text-emerald-100 mb-3">
+                      🏆 Novas conquistas desbloqueadas
+                    </p>
+                    <ul className="space-y-2">
+                      {newAchievements.map(achievement => (
+                        <li
+                          key={achievement.achievement_id}
+                          className="rounded-lg bg-black/10 p-3"
+                        >
+                          <div className="font-semibold">
+                            {achievement.icon} {achievement.name}
+                          </div>
+                          <div className="text-sm text-white/80">
+                            {achievement.description}
+                          </div>
+                          <div className="text-xs text-emerald-100 mt-1">
+                            +{achievement.points} pts • {achievement.rarity}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      to="/achievements"
+                      className="inline-flex mt-4 rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition"
+                    >
+                      Ver conquistas
+                    </Link>
+                  </div>
+                )}
             </div>
 
             <button

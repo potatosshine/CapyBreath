@@ -2,6 +2,7 @@ from pydantic import Field, field_validator, ConfigDict
 from datetime import datetime
 from uuid import UUID
 from app.schemas.common import BaseSchema, TimestampSchema, UUIDSchema
+from app.schemas.achievement import AchievementUnlocked
 
 # create
 class SessionCreate(BaseSchema):
@@ -153,6 +154,13 @@ class SessionDetailResponse(SessionResponse):
     is_personal_best: bool = Field(
         ...,
         description="Indica se foi o melhor tempo do usuário"
+    )
+
+
+class SessionCreateResponse(SessionDetailResponse):
+    newly_unlocked: list[AchievementUnlocked] = Field(
+        default_factory=list,
+        description="Conquistas desbloqueadas ao criar a sessão"
     )
 
 

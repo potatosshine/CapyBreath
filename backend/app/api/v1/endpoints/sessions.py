@@ -7,6 +7,7 @@ from app.schemas.session import (
     SessionUpdate,
     SessionResponse,
     SessionDetailResponse,
+    SessionCreateResponse,
     SessionListItem,
     SessionsSummary,
     ProgressResponse,
@@ -23,7 +24,7 @@ router = APIRouter(prefix="/sessions", tags=["Sessions"])
 # crud operations
 @router.post(
     "",
-    response_model=SessionDetailResponse,
+    response_model=SessionCreateResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Criar nova sessão"
 )
@@ -59,7 +60,10 @@ async def create_session(
             extra={"unlocked_count": len(newly_unlocked)}
         )
     
-    return session
+    return SessionCreateResponse(
+        **session.model_dump(),
+        newly_unlocked=newly_unlocked
+    )
 
 
 @router.get(
