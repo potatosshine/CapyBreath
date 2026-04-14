@@ -15,6 +15,14 @@ from app.core.audit import log_security_event
 from app.core.logging import mask_sensitive
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+GENERIC_REGISTER_ERROR_MESSAGE = (
+    "Não foi possível concluir o cadastro com os dados informados"
+)
+GENERIC_LOGIN_ERROR_MESSAGE = "Email ou senha inválidos"
+
+
+def _raise_generic_auth_error(status_code: int, detail: str) -> None:
+    raise HTTPException(status_code=status_code, detail=detail)
 
 
 @router.post(
@@ -48,11 +56,14 @@ async def register(
             event="auth_register_failed",
             request=request,
             status_code=status.HTTP_400_BAD_REQUEST,
-            extra={"email": mask_sensitive(user_data.email)}
+            extra={
+                "email": mask_sensitive(user_data.email),
+                "failure_reason": str(e)
+            }
         )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+        _raise_generic_auth_error(
+            status.HTTP_400_BAD_REQUEST,
+            GENERIC_REGISTER_ERROR_MESSAGE
         )
 
 
@@ -86,11 +97,14 @@ async def login(
             event="auth_login_failed",
             request=request,
             status_code=status.HTTP_401_UNAUTHORIZED,
-            extra={"email": mask_sensitive(login_data.email)}
+            extra={
+                "email": mask_sensitive(login_data.email),
+                "failure_reason": str(e)
+            }
         )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
+        _raise_generic_auth_error(
+            status.HTTP_401_UNAUTHORIZED,
+            GENERIC_LOGIN_ERROR_MESSAGE
         )
 
 
