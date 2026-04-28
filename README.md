@@ -388,3 +388,40 @@ Desenvolvido por [Seu Nome]
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
 - [Vite Guide](https://vitejs.dev/guide/)
+
+
+## 🎨 Plano de Padronização Visual (UI/UX)
+
+Para alinhar a experiência entre a tela principal de respiração e as demais páginas (dashboard, comunidade, conquistas, sessões, perfil e autenticação), o plano recomendado é:
+
+1. **Criar um Page Shell único**
+   - Fundo gradiente sutil da marca para páginas de conteúdo e variação mais intensa para foco respiratório.
+   - Container com largura e espaçamentos padronizados por breakpoint.
+
+2. **Consolidar tokens semânticos no Tailwind**
+   - Definir superfícies (`surface-primary`, `surface-glass`), bordas e sombras consistentes.
+   - Manter paleta `capy.*` e introduzir camada semântica para reduzir variação de classes utilitárias.
+
+3. **Construir componentes base reutilizáveis**
+   - `PageContainer`, `SectionCard`, `PrimaryButton`, `SecondaryButton`, `LoadingState`, `ErrorState`, `EmptyState`.
+   - Trocar padrões repetidos de cards e botões por componentes para consistência visual.
+
+4. **Priorizar páginas com maior impacto**
+   - Sessões (`SessionPage`/`SessionDetailPage`) primeiro, usando como inspiração o layout do vídeo enviado.
+   - Em seguida: Dashboard + Login/Register.
+   - Depois: Community, Achievements e Profile.
+
+5. **Padronizar tipografia, interações e acessibilidade**
+   - Escala clara de títulos/subtítulos, estados de foco visíveis e contraste AA em textos.
+   - Uniformizar mensagens de feedback (erro/sucesso/info) entre toast e alertas inline.
+
+6. **Executar em fases curtas (sem “big bang”)**
+   - Fase 1: fundação (tokens + componentes base).
+   - Fase 2: sessões + autenticação.
+   - Fase 3: dashboard/comunidade/conquistas.
+   - Fase 4: perfil + refinamentos finais.
+
+**Critérios de aceite sugeridos:**
+- Todas as páginas principais usam o mesmo shell visual.
+- Cards e botões críticos reutilizam componentes padrão (em vez de estilos ad hoc).
+- Diferença visual entre páginas de conteúdo e tela de sessão é intencional e consistente com a identidade CapyBreath.

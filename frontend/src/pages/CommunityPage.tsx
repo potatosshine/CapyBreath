@@ -8,6 +8,8 @@ import {
 } from '../api/userApi';
 import type { PublicUserStats, User } from '../types/user.types';
 import { useAuthContext } from '../features/auth/AuthProvider';
+import PageShell from '../components/ui/PageShell';
+import SectionCard from '../components/ui/SectionCard';
 
 const CommunityPage = () => {
   const { isAuthenticated } = useAuthContext();
@@ -73,97 +75,91 @@ const CommunityPage = () => {
     items: PublicUserStats[],
     metric: (item: PublicUserStats) => string
   ) => (
-    <section className="rounded-xl border bg-white p-5 shadow-sm">
+    <SectionCard className="p-5">
       <h2 className="text-xl font-semibold mb-3">{title}</h2>
       {items.length === 0 ? (
         <p className="text-gray-600">Nenhum dado disponível.</p>
       ) : (
         <ol className="space-y-3">
           {items.map((item, index) => (
-            <li key={item.id} className="flex items-center justify-between rounded border p-3">
+            <li key={item.id} className="flex items-center justify-between rounded-xl border border-capy-secondary/30 bg-white p-3">
               <div>
-                <p className="font-semibold">
-                  #{index + 1} {item.full_name || item.username}
-                </p>
+                <p className="font-semibold">#{index + 1} {item.full_name || item.username}</p>
                 <p className="text-sm text-gray-500">@{item.username}</p>
               </div>
-              <span className="text-sm font-bold">{metric(item)}</span>
+              <span className="rounded-full bg-capy-light px-3 py-1 text-sm font-bold">{metric(item)}</span>
             </li>
           ))}
         </ol>
       )}
-    </section>
+    </SectionCard>
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 mt-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Comunidade</h1>
-        <p className="text-gray-600">
-          O leaderboard é público. A busca por usuários exige autenticação.
-        </p>
-      </div>
+    <PageShell>
+      <div className="max-w-6xl mx-auto p-6 md:p-10 space-y-6">
+        <SectionCard>
+          <h1 className="text-3xl font-bold mb-2">Comunidade</h1>
+          <p className="text-capy-dark/70">
+            O leaderboard é público. A busca por usuários exige autenticação.
+          </p>
+        </SectionCard>
 
-      {loading ? (
-        <div>Carregando leaderboard...</div>
-      ) : boardError ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {boardError}
-        </div>
-      ) : (
-        <div className="grid gap-6 xl:grid-cols-3">
-          {renderBoard('Top retenção', retentionBoard, item => `${item.best_retention_time}s`)}
-          {renderBoard('Top streak', streakBoard, item => `${item.current_streak} dias`)}
-          {renderBoard('Mais ativos', activeBoard, item => `${item.total_sessions} sessões`)}
-        </div>
-      )}
-
-      <section className="rounded-xl border bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <h2 className="text-xl font-semibold">Buscar usuários</h2>
-          {!isAuthenticated && (
-            <span className="text-sm text-gray-500">
-              Faça login para pesquisar outros usuários.
-            </span>
-          )}
-        </div>
-
-        <form onSubmit={handleSearch} className="flex flex-col gap-3 md:flex-row">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={event => setSearchTerm(event.target.value)}
-            disabled={!isAuthenticated}
-            placeholder="Buscar por username"
-            className="flex-1 rounded border px-3 py-2 disabled:bg-gray-100"
-          />
-          <button
-            type="submit"
-            disabled={!isAuthenticated || searching}
-            className="rounded bg-capy-primary px-4 py-2 font-semibold text-white hover:bg-capy-primary/90 disabled:opacity-50"
-          >
-            {searching ? 'Buscando...' : 'Buscar'}
-          </button>
-        </form>
-
-        {searchError && (
-          <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {searchError}
+        {loading ? (
+          <SectionCard>Carregando leaderboard...</SectionCard>
+        ) : boardError ? (
+          <SectionCard className="border-red-200 bg-red-50 text-red-700">{boardError}</SectionCard>
+        ) : (
+          <div className="grid gap-6 xl:grid-cols-3">
+            {renderBoard('Top retenção', retentionBoard, item => `${item.best_retention_time}s`)}
+            {renderBoard('Top streak', streakBoard, item => `${item.current_streak} dias`)}
+            {renderBoard('Mais ativos', activeBoard, item => `${item.total_sessions} sessões`)}
           </div>
         )}
 
-        {searchResults.length > 0 && (
-          <ul className="mt-4 grid gap-3 md:grid-cols-2">
-            {searchResults.map(result => (
-              <li key={result.id} className="rounded border p-3">
-                <p className="font-semibold">{result.full_name || result.username}</p>
-                <p className="text-sm text-gray-500">@{result.username}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-    </div>
+        <SectionCard className="p-5">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <h2 className="text-xl font-semibold">Buscar usuários</h2>
+            {!isAuthenticated && (
+              <span className="text-sm text-gray-500">Faça login para pesquisar outros usuários.</span>
+            )}
+          </div>
+
+          <form onSubmit={handleSearch} className="flex flex-col gap-3 md:flex-row">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={event => setSearchTerm(event.target.value)}
+              disabled={!isAuthenticated}
+              placeholder="Buscar por username"
+              className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-capy-primary/40 disabled:bg-gray-100"
+            />
+            <button
+              type="submit"
+              disabled={!isAuthenticated || searching}
+              className="rounded-xl bg-capy-primary px-5 py-3 font-semibold text-white hover:bg-capy-primary/90 disabled:opacity-50"
+            >
+              {searching ? 'Buscando...' : 'Buscar'}
+            </button>
+          </form>
+
+          {searchError && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{searchError}</div>
+          )}
+
+          {searchResults.length > 0 && (
+            <ul className="mt-4 grid gap-3 md:grid-cols-2">
+              {searchResults.map(result => (
+                <li key={result.id} className="rounded-xl border border-capy-secondary/30 bg-white p-3">
+                  <p className="font-semibold">{result.full_name || result.username}</p>
+                  <p className="text-sm text-gray-500">@{result.username}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
+      </div>
+    </PageShell>
   );
 };
 

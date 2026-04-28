@@ -14,6 +14,9 @@ import AchievementsPage from './pages/AchievementsPage';
 import ProfilePage from './pages/ProfilePage';
 import SessionDetailPage from './pages/SessionDetailPage';
 import CommunityPage from './pages/CommunityPage';
+import ExampleBreathingPage from './pages/examples/ExampleBreathingPage';
+import ExampleDashboardPage from './pages/examples/ExampleDashboardPage';
+import ExampleAuthPage from './pages/examples/ExampleAuthPage';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -64,6 +67,10 @@ createRoot(document.getElementById('root')!).render(
             }
           />
           <Route path="/community" element={<CommunityPage />} />
+
+          <Route path="/examples/breathing" element={<ExampleBreathingPage />} />
+          <Route path="/examples/dashboard" element={<ExampleDashboardPage />} />
+          <Route path="/examples/auth" element={<ExampleAuthPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { updateProfile } from '../../api/userApi';
 import { useAuthContext } from '../auth/AuthProvider';
 import { getApiErrorMessage } from '../../api/apiError';
+import SectionCard from '../../components/ui/SectionCard';
 
 const EditProfileForm = () => {
   const { user, setUser, showToast } = useAuthContext();
@@ -11,7 +12,7 @@ const EditProfileForm = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  if (!user) return <div>Usuário não autenticado.</div>;
+  if (!user) return <SectionCard>Usuário não autenticado.</SectionCard>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,37 +37,34 @@ const EditProfileForm = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-sm mx-auto p-8 bg-white rounded-xl shadow-md flex flex-col gap-4 mt-8"
-    >
-      <h2 className="text-2xl font-bold mb-4 text-center">Editar Perfil</h2>
-      {success && (
-        <div className="text-green-600 text-sm text-center">{success}</div>
-      )}
-      {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-      <input
-        type="text"
-        placeholder="Nome completo"
-        value={fullName}
-        onChange={e => setFullName(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      <input
-        type="url"
-        placeholder="URL do avatar"
-        value={avatarUrl}
-        onChange={e => setAvatarUrl(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
-      <button
-        type="submit"
-        className="bg-capy-primary text-white font-bold py-2 rounded hover:bg-capy-primary/90 transition"
-        disabled={loading}
-      >
-        {loading ? 'Salvando...' : 'Salvar Alterações'}
-      </button>
-    </form>
+    <SectionCard className="shadow-lg">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <h2 className="text-2xl font-bold">Editar Perfil</h2>
+        {success && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-700">{success}</div>}
+        {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+        <input
+          type="text"
+          placeholder="Nome completo"
+          value={fullName}
+          onChange={e => setFullName(e.target.value)}
+          className="rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus-visible:ring-2 focus-visible:ring-capy-primary/40"
+        />
+        <input
+          type="url"
+          placeholder="URL do avatar"
+          value={avatarUrl}
+          onChange={e => setAvatarUrl(e.target.value)}
+          className="rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus-visible:ring-2 focus-visible:ring-capy-primary/40"
+        />
+        <button
+          type="submit"
+          className="rounded-xl bg-capy-primary py-3 font-bold text-white transition hover:bg-capy-primary/90 disabled:opacity-50"
+          disabled={loading}
+        >
+          {loading ? 'Salvando...' : 'Salvar Alterações'}
+        </button>
+      </form>
+    </SectionCard>
   );
 };
 
