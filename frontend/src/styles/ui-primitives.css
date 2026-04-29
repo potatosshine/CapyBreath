@@ -1,0 +1,132 @@
+.ui-page-container {
+  width: min(100% - 2 * var(--space-4), var(--container-desktop));
+  margin-inline: auto;
+  padding-block: var(--space-8);
+}
+
+.ui-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+
+.ui-card--compact {
+  padding: var(--space-4);
+}
+
+.ui-btn {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-base);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.ui-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ui-btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.ui-btn--primary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-primary) 90%, black);
+}
+
+.ui-btn--secondary {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.ui-btn--secondary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-secondary) 90%, black);
+}
+
+.ui-btn--ghost {
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.ui-btn--danger {
+  background: var(--color-error);
+  color: #fff;
+}
+
+.ui-btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--color-error) 90%, black);
+}
+
+.ui-alert {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.ui-alert--error {
+  border-color: color-mix(in oklab, var(--color-error) 45%, white);
+  background: color-mix(in oklab, var(--color-error) 12%, white);
+  color: var(--color-error);
+}
+
+.ui-alert--success {
+  border-color: color-mix(in oklab, var(--color-success) 45%, white);
+  background: color-mix(in oklab, var(--color-success) 12%, white);
+  color: var(--color-success);
+}
+
+.ui-alert--info {
+  border-color: color-mix(in oklab, var(--color-accent) 45%, white);
+  background: color-mix(in oklab, var(--color-accent) 12%, white);
+  color: var(--color-accent);
+}
+
+.ui-field {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ui-field__label {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.ui-field__control {
+  min-height: var(--touch-target-min);
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.ui-field__control--multiline {
+  padding-block: var(--space-2);
+}
+
+.ui-field__error {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+
+.ui-field--error .ui-field__control {
+  border-color: var(--color-error);
+}

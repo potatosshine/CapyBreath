@@ -12,6 +12,11 @@ import type {
 } from '../types/session.types';
 import { getApiErrorMessage } from '../api/apiError';
 import { useAuthContext } from '../features/auth/AuthProvider';
+import PageContainer from '../components/ui/PageContainer';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
+import InputField from '../components/ui/InputField';
 
 const moodOptions = Array.from({ length: 10 }, (_, index) => index + 1);
 
@@ -115,78 +120,62 @@ const SessionDetailPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 mt-8">
+    <PageContainer className="max-w-4xl mt-2">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
-          <p className="text-sm text-gray-500">Histórico de Sessões</p>
+          <p className="text-sm">Histórico de Sessões</p>
           <h1 className="text-2xl font-bold">Detalhe da sessão</h1>
         </div>
-        <Link
-          to="/session"
-          className="rounded border px-4 py-2 text-sm font-medium hover:bg-gray-50"
-        >
-          ← Voltar ao histórico
+        <Link to="/session">
+          <Button variant="ghost" type="button">
+            ← Voltar ao histórico
+          </Button>
         </Link>
       </div>
 
       {loading ? (
-        <div className="rounded-xl border bg-white p-6 text-gray-600">
-          Carregando sessão...
-        </div>
+        <Card>
+          <p>Carregando sessão...</p>
+        </Card>
       ) : error && !session ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
-          {error}
-        </div>
+        <Alert variant="error">{error}</Alert>
       ) : (
         <>
           <SessionDetails session={session} />
 
-          <form
-            onSubmit={handleSave}
-            className="max-w-2xl mx-auto mt-6 rounded-xl border bg-white p-6 shadow-sm"
-          >
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <h2 className="text-xl font-bold">Editar sessão</h2>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {deleting ? 'Excluindo...' : 'Excluir sessão'}
-              </button>
-            </div>
-
-            {error && session && (
-              <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
+          <Card className="max-w-2xl mx-auto mt-6">
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-xl font-bold">Editar sessão</h2>
+                <Button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  variant="danger"
+                >
+                  {deleting ? 'Excluindo...' : 'Excluir sessão'}
+                </Button>
               </div>
-            )}
 
-            <div className="space-y-4">
-              <label className="block">
-                <span className="mb-1 block text-sm font-medium text-gray-700">
-                  Notas
-                </span>
-                <textarea
-                  value={notes}
-                  onChange={event => setNotes(event.target.value)}
-                  rows={4}
-                  maxLength={500}
-                  className="w-full rounded border px-3 py-2"
-                  placeholder="Adicione observações sobre esta prática"
-                />
-              </label>
+              {error && session && <Alert variant="error">{error}</Alert>}
+
+              <InputField
+                label="Notas"
+                multiline
+                rows={4}
+                maxLength={500}
+                value={notes}
+                onChange={event => setNotes(event.target.value)}
+                placeholder="Adicione observações sobre esta prática"
+              />
 
               <div className="grid gap-4 md:grid-cols-2">
-                <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-gray-700">
-                    Humor antes
-                  </span>
+                <label className="ui-field">
+                  <span className="ui-field__label">Humor antes</span>
                   <select
                     value={moodBefore}
                     onChange={event => setMoodBefore(event.target.value)}
-                    className="w-full rounded border px-3 py-2"
+                    className="ui-field__control"
                   >
                     <option value="">Não informado</option>
                     {moodOptions.map(option => (
@@ -197,14 +186,12 @@ const SessionDetailPage = () => {
                   </select>
                 </label>
 
-                <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-gray-700">
-                    Humor depois
-                  </span>
+                <label className="ui-field">
+                  <span className="ui-field__label">Humor depois</span>
                   <select
                     value={moodAfter}
                     onChange={event => setMoodAfter(event.target.value)}
-                    className="w-full rounded border px-3 py-2"
+                    className="ui-field__control"
                   >
                     <option value="">Não informado</option>
                     {moodOptions.map(option => (
@@ -215,21 +202,17 @@ const SessionDetailPage = () => {
                   </select>
                 </label>
               </div>
-            </div>
 
-            <div className="mt-6 flex justify-end">
-              <button
-                type="submit"
-                disabled={saving || deleting}
-                className="rounded bg-capy-primary px-5 py-2 font-semibold text-white hover:bg-capy-primary/90 disabled:opacity-50"
-              >
-                {saving ? 'Salvando...' : 'Salvar alterações'}
-              </button>
-            </div>
-          </form>
+              <div className="flex justify-end">
+                <Button type="submit" disabled={saving || deleting}>
+                  {saving ? 'Salvando...' : 'Salvar alterações'}
+                </Button>
+              </div>
+            </form>
+          </Card>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 };
 

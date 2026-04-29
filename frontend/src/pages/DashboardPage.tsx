@@ -21,6 +21,9 @@ import type {
 } from '../types/session.types';
 import type { UserStats } from '../types/user.types';
 import { getApiErrorMessage } from '../api/apiError';
+import PageContainer from '../components/ui/PageContainer';
+import Card from '../components/ui/Card';
+import Alert from '../components/ui/Alert';
 
 const DashboardPage = () => {
   const { user } = useAuthContext();
@@ -87,9 +90,9 @@ const DashboardPage = () => {
         : 'Estável';
 
   return (
-    <div className="max-w-6xl mx-auto p-6 mt-8 space-y-8">
+    <PageContainer className="max-w-6xl mt-2 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">
+        <h1 className="mb-2 text-3xl font-bold">
           Bem-vindo, {user.full_name || user.username}!
         </h1>
         <p className="text-gray-600">
@@ -100,50 +103,48 @@ const DashboardPage = () => {
       {loading ? (
         <div>Carregando dashboard...</div>
       ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
+        <Alert variant="error">{error}</Alert>
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
+            <Card compact>
               <p className="text-sm text-gray-500">Streak atual</p>
               <p className="text-3xl font-bold">{summary?.current_streak ?? 0}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 Melhor streak: {summary?.longest_streak ?? 0}
               </p>
-            </div>
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
+            </Card>
+            <Card compact>
               <p className="text-sm text-gray-500">Melhor retenção</p>
               <p className="text-3xl font-bold">
                 {summary?.best_retention_time ?? userStats?.best_retention_time ?? 0}s
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 Média: {Math.round(summary?.average_retention_time ?? 0)}s
               </p>
-            </div>
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
+            </Card>
+            <Card compact>
               <p className="text-sm text-gray-500">Humor médio</p>
               <p className="text-3xl font-bold">
                 {mood ? mood.average_improvement.toFixed(1) : '—'}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 Antes {mood ? mood.average_mood_before.toFixed(1) : '—'} / Depois{' '}
                 {mood ? mood.average_mood_after.toFixed(1) : '—'}
               </p>
-            </div>
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
+            </Card>
+            <Card compact>
               <p className="text-sm text-gray-500">Tendência (30 dias)</p>
               <p className="text-3xl font-bold">{trendLabel ?? '—'}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 {progress?.data_points.length ?? 0} ponto(s) observados
               </p>
-            </div>
+            </Card>
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
+            <Card compact>
+              <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Resumo analítico</h2>
                 <Link to="/session" className="text-sm text-capy-primary hover:underline">
                   Ver histórico
@@ -171,10 +172,10 @@ const DashboardPage = () => {
                   </p>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-semibold mb-3">Personal Best</h2>
+            <Card compact>
+              <h2 className="mb-3 text-xl font-semibold">Personal Best</h2>
               {personalBest ? (
                 <div className="space-y-2">
                   <p className="text-3xl font-bold">{personalBest.retention_time}s</p>
@@ -188,12 +189,12 @@ const DashboardPage = () => {
               ) : (
                 <p className="text-gray-600">Nenhum personal best disponível ainda.</p>
               )}
-            </div>
+            </Card>
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-semibold mb-3">Conquistas recentes</h2>
+            <Card compact>
+              <h2 className="mb-3 text-xl font-semibold">Conquistas recentes</h2>
               {achievements.length === 0 ? (
                 <div>Nenhuma conquista encontrada.</div>
               ) : (
@@ -201,17 +202,17 @@ const DashboardPage = () => {
                   {achievements.slice(0, 5).map(achievement => (
                     <li
                       key={achievement.id}
-                      className="bg-green-100 px-3 py-1 rounded text-green-800 text-sm font-medium"
+                      className="rounded bg-green-100 px-3 py-1 text-sm font-medium text-green-800"
                     >
                       {achievement.name}
                     </li>
                   ))}
                 </ul>
               )}
-            </div>
+            </Card>
 
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <h2 className="text-xl font-semibold mb-3">Sessões recentes</h2>
+            <Card compact>
+              <h2 className="mb-3 text-xl font-semibold">Sessões recentes</h2>
               {sessions.length === 0 ? (
                 <div>Nenhuma sessão encontrada.</div>
               ) : (
@@ -228,11 +229,11 @@ const DashboardPage = () => {
                   ))}
                 </ul>
               )}
-            </div>
+            </Card>
           </section>
 
-          <section className="rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-semibold mb-3">Progressão recente</h2>
+          <Card compact>
+            <h2 className="mb-3 text-xl font-semibold">Progressão recente</h2>
             {progress?.data_points.length ? (
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {progress.data_points.slice(-4).map(point => (
@@ -248,10 +249,10 @@ const DashboardPage = () => {
             ) : (
               <p className="text-gray-600">Sem dados suficientes para progressão.</p>
             )}
-          </section>
+          </Card>
 
-          <section className="rounded-xl border bg-white p-5 shadow-sm">
-            <h2 className="text-xl font-semibold mb-3">Personals bests recentes</h2>
+          <Card compact>
+            <h2 className="mb-3 text-xl font-semibold">Personals bests recentes</h2>
             {recentPersonalBests.length ? (
               <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {recentPersonalBests.map(item => (
@@ -266,10 +267,10 @@ const DashboardPage = () => {
             ) : (
               <p className="text-gray-600">Nenhum personal best recente.</p>
             )}
-          </section>
+          </Card>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 };
 

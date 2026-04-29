@@ -5,6 +5,11 @@ import Navbar from './components/Navbar';
 import BreathingCircle from './components/BreathingCircle';
 import BreathCounter from './components/BreathCounter';
 import Timer from './components/Timer';
+import {
+  PhaseActionButton,
+  SessionHero,
+  SessionPanel,
+} from './components/session/SessionLayout';
 import { createSession } from './api/sessionApi';
 import { getApiErrorMessage } from './api/apiError';
 import { useAuthContext } from './features/auth/AuthProvider';
@@ -136,18 +141,16 @@ function App() {
   // Renderiza tela inicial (antes de começar)
   if (fase === 'inicio') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-capy-secondary to-capy-accent flex flex-col">
+      <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-capy-secondary to-capy-accent flex flex-col">
         <Navbar />
         <div className="flex flex-col items-center justify-center flex-1 p-8">
-          <h1 className="text-6xl font-bold text-white mb-4 drop-shadow-lg">
-            🦫 CapyBreath
-          </h1>
-          <p className="text-xl text-white/90 mb-12">
-            Respiração Consciente e Tranquila
-          </p>
+          <SessionHero
+            title="🦫 CapyBreath"
+            subtitle="Respiração Consciente e Tranquila"
+          />
 
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-md mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
+          <SessionPanel className="mb-8 w-full max-w-md">
+            <h2 className="mb-4 text-2xl font-bold text-white">
               Como Funciona
             </h2>
             <ul className="space-y-3 text-white/90">
@@ -168,14 +171,14 @@ function App() {
                 <span>3 rounds por sessão (padrão)</span>
               </li>
             </ul>
-          </div>
+          </SessionPanel>
 
-          <button
+          <PhaseActionButton
             onClick={handleStartSession}
-            className="px-12 py-5 bg-white text-capy-primary font-bold text-2xl rounded-full hover:bg-white/90 hover:scale-105 transition-all shadow-2xl active:scale-95"
+            className="px-12 py-5 text-2xl font-bold shadow-2xl hover:scale-105 active:scale-95"
           >
             ▶ Iniciar Sessão
-          </button>
+          </PhaseActionButton>
         </div>
       </div>
     );
@@ -183,18 +186,16 @@ function App() {
 
   // Renderiza tela de sessão ativa
   return (
-    <div className="min-h-screen bg-gradient-to-b from-capy-secondary to-capy-accent flex flex-col items-center justify-center p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-          🦫 CapyBreath
-        </h1>
-        <p className="text-white/80 text-lg">{MENSAGENS[fase]}</p>
-        {fase !== 'finalizada' && (
-          <p className="text-white/70 text-sm mt-2">
-            Round {roundAtual} de {totalRounds}
-          </p>
-        )}
-      </div>
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-capy-secondary to-capy-accent flex flex-col items-center justify-center p-8">
+      <SessionHero
+        title="🦫 CapyBreath"
+        subtitle={MENSAGENS[fase]}
+        roundInfo={
+          fase !== 'finalizada'
+            ? `Round ${roundAtual} de ${totalRounds}`
+            : undefined
+        }
+      />
 
       <div className="flex-1 flex flex-col items-center justify-center space-y-8 w-full max-w-2xl">
         {fase === 'respiracao' && (
@@ -208,12 +209,13 @@ function App() {
           <>
             <Timer segundos={tempoRetencao} label="Tempo de Retenção" />
             <BreathingCircle isInhaling={false} fase={fase} />
-            <button
+            <PhaseActionButton
               onClick={proximaFase}
-              className="mt-8 px-8 py-4 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-bold text-xl rounded-full hover:bg-white/30 transition-all"
+              variant="ghost"
+              className="mt-8 text-xl font-bold"
             >
               Terminar Retenção →
-            </button>
+            </PhaseActionButton>
           </>
         )}
 
@@ -231,15 +233,15 @@ function App() {
             <h2 className="text-4xl font-bold text-white mb-4">
               Sessão Concluída!
             </h2>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6">
-              <p className="text-white/70 text-sm uppercase tracking-wide mb-2">
+            <SessionPanel>
+              <p className="mb-2 text-sm uppercase tracking-wide text-white/70">
                 Tempo de Retenção
               </p>
               <Timer segundos={tempoRetencaoFinal} />
-            </div>
+            </SessionPanel>
 
             {retencoesPorRound.length > 0 && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-left max-w-xl mx-auto">
+              <SessionPanel className="mx-auto max-w-xl text-left">
                 <h3 className="text-white font-semibold mb-3">
                   Retenção por round
                 </h3>
@@ -254,10 +256,10 @@ function App() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </SessionPanel>
             )}
 
-            <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 text-left text-white shadow-lg max-w-xl mx-auto">
+            <SessionPanel className="mx-auto max-w-xl text-left text-white shadow-lg">
               <h3 className="text-xl font-bold mb-3">Resumo da sessão</h3>
 
               {savingSession && (
@@ -282,13 +284,13 @@ function App() {
                   <div className="flex flex-wrap gap-3 pt-1">
                     <Link
                       to="/login"
-                      className="rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition"
+                      className="min-h-[44px] rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition inline-flex items-center"
                     >
                       Entrar
                     </Link>
                     <Link
                       to="/register"
-                      className="rounded-full border border-white/50 px-4 py-2 text-white font-semibold hover:bg-white/10 transition"
+                      className="min-h-[44px] rounded-full border border-white/50 px-4 py-2 text-white font-semibold hover:bg-white/10 transition inline-flex items-center"
                     >
                       Criar conta
                     </Link>
@@ -327,38 +329,32 @@ function App() {
                     </ul>
                     <Link
                       to="/achievements"
-                      className="inline-flex mt-4 rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition"
+                      className="mt-4 inline-flex min-h-[44px] items-center rounded-full bg-white px-4 py-2 text-capy-primary font-semibold hover:bg-white/90 transition"
                     >
                       Ver conquistas
                     </Link>
                   </div>
                 )}
-            </div>
+            </SessionPanel>
 
-            <button
+            <PhaseActionButton
               onClick={handleStartSession}
-              className="mt-4 px-10 py-4 bg-white text-capy-primary font-bold text-xl rounded-full hover:bg-white/90 hover:scale-105 transition-all shadow-lg"
+              className="mt-4 px-10 py-4 text-xl font-bold shadow-lg hover:scale-105"
             >
               🔄 Nova Sessão
-            </button>
+            </PhaseActionButton>
           </div>
         )}
       </div>
 
       {fase !== 'finalizada' && (
-        <div className="mt-8 flex gap-4">
-          <button
-            onClick={togglePausa}
-            className="px-6 py-3 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold rounded-full hover:bg-white/30 transition-all"
-          >
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <PhaseActionButton onClick={togglePausa} variant="ghost">
             {pausada ? '▶ Retomar' : '⏸ Pausar'}
-          </button>
-          <button
-            onClick={pararSessao}
-            className="px-6 py-3 bg-white/20 backdrop-blur-sm border-2 border-white/40 text-white font-semibold rounded-full hover:bg-white/30 transition-all"
-          >
+          </PhaseActionButton>
+          <PhaseActionButton onClick={pararSessao} variant="ghost">
             ⏹ Parar
-          </button>
+          </PhaseActionButton>
         </div>
       )}
     </div>

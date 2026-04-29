@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react';
 import { getSessions } from '../../api/sessionApi';
 import type { SessionListItem } from '../../types/session.types';
 import { getApiErrorMessage } from '../../api/apiError';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
+import PageContainer from '../../components/ui/PageContainer';
 
 const SessionHistory = () => {
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
@@ -30,14 +33,12 @@ const SessionHistory = () => {
   }, [page]);
 
   return (
-    <div className="max-w-2xl mx-auto p-6 mt-8">
+    <PageContainer className="max-w-2xl mt-2">
       <h1 className="text-2xl font-bold mb-4">Histórico de Sessões</h1>
       {loading ? (
         <div>Carregando sessões...</div>
       ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
+        <Alert variant="error">{error}</Alert>
       ) : sessions.length === 0 ? (
         <div>Nenhuma sessão encontrada.</div>
       ) : (
@@ -47,50 +48,48 @@ const SessionHistory = () => {
               <li key={s.id}>
                 <Link
                   to={`/session/${s.id}`}
-                  className="py-3 flex flex-col md:flex-row md:items-center md:gap-4 hover:bg-gray-50 rounded px-2 transition"
+                  className="flex min-h-[44px] flex-col rounded px-2 py-3 transition hover:bg-gray-50 md:flex-row md:items-center md:gap-4"
                 >
-                <span className="font-mono text-xs text-gray-500">
-                  {new Date(s.session_date).toLocaleString('pt-BR')}
-                </span>
-                <span className="ml-2">
-                  Retenção: <b>{s.retention_time}s</b>
-                </span>
-                <span className="ml-2 text-xs text-gray-500">
-                  Técnica: {s.technique_variant}
-                </span>
-                {s.is_personal_best && (
-                  <span className="ml-2 text-xs font-semibold text-amber-600">
-                    🏆 Personal Best
+                  <span className="font-mono text-xs text-gray-500">
+                    {new Date(s.session_date).toLocaleString('pt-BR')}
                   </span>
-                )}
+                  <span className="md:ml-2">
+                    Retenção: <b>{s.retention_time}s</b>
+                  </span>
+                  <span className="md:ml-2 text-xs text-gray-500">
+                    Técnica: {s.technique_variant}
+                  </span>
+                  {s.is_personal_best && (
+                    <span className="md:ml-2 text-xs font-semibold text-amber-600">
+                      🏆 Personal Best
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex items-center gap-3">
-            <button
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setPage(prev => Math.max(1, prev - 1))}
               disabled={page <= 1}
-              className="px-3 py-1 rounded border disabled:opacity-50"
             >
               Anterior
-            </button>
-            <span className="text-sm text-gray-600">
-              Página {page} de {pages}
-            </span>
-            <button
+            </Button>
+            <span className="text-sm">Página {page} de {pages}</span>
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setPage(prev => Math.min(pages, prev + 1))}
               disabled={page >= pages}
-              className="px-3 py-1 rounded border disabled:opacity-50"
             >
               Próxima
-            </button>
+            </Button>
           </div>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 };
 
