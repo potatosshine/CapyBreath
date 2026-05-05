@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthContext } from '../features/auth/AuthProvider';
 import { getMyAchievements } from '../api/achievementApi';
@@ -25,6 +26,40 @@ import PageContainer from '../components/ui/PageContainer';
 import Card from '../components/ui/Card';
 import Alert from '../components/ui/Alert';
 
+type MetricCardProps = {
+  label: string;
+  value: string | number;
+  helper?: string;
+};
+
+const MetricCard = ({ label, value, helper }: MetricCardProps) => (
+  <Card compact>
+    <p className="text-sm text-gray-500">{label}</p>
+    <p className="text-3xl font-bold">{value}</p>
+    {helper && <p className="mt-1 text-sm text-gray-500">{helper}</p>}
+  </Card>
+);
+
+type SectionCardProps = {
+  title: string;
+  actions?: ReactNode;
+  children: ReactNode;
+};
+
+const SectionCard = ({ title, actions, children }: SectionCardProps) => (
+  <Card compact>
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h2 className="text-xl font-semibold">{title}</h2>
+      {actions}
+    </div>
+    {children}
+  </Card>
+);
+
+const EmptyState = ({ text }: { text: string }) => (
+  <p className="text-gray-600">{text}</p>
+);
+
 const DashboardPage = () => {
   const { user } = useAuthContext();
   const [achievements, setAchievements] = useState<UnlockedAchievement[]>([]);
@@ -34,7 +69,9 @@ const DashboardPage = () => {
   const [progress, setProgress] = useState<ProgressResponse | null>(null);
   const [mood, setMood] = useState<MoodCorrelationResponse | null>(null);
   const [personalBest, setPersonalBest] = useState<SessionDetail | null>(null);
-  const [recentPersonalBests, setRecentPersonalBests] = useState<SessionDetail[]>([]);
+  const [recentPersonalBests, setRecentPersonalBests] = useState<
+    SessionDetail[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,63 +138,60 @@ const DashboardPage = () => {
       </div>
 
       {loading ? (
-        <div>Carregando dashboard...</div>
+        <Card compact>
+          <p>Carregando dashboard...</p>
+        </Card>
       ) : error ? (
         <Alert variant="error">{error}</Alert>
       ) : (
         <>
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Card compact>
-              <p className="text-sm text-gray-500">Streak atual</p>
-              <p className="text-3xl font-bold">{summary?.current_streak ?? 0}</p>
-              <p className="mt-1 text-sm text-gray-500">
-                Melhor streak: {summary?.longest_streak ?? 0}
-              </p>
-            </Card>
-            <Card compact>
-              <p className="text-sm text-gray-500">Melhor retenção</p>
-              <p className="text-3xl font-bold">
-                {summary?.best_retention_time ?? userStats?.best_retention_time ?? 0}s
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Média: {Math.round(summary?.average_retention_time ?? 0)}s
-              </p>
-            </Card>
-            <Card compact>
-              <p className="text-sm text-gray-500">Humor médio</p>
-              <p className="text-3xl font-bold">
-                {mood ? mood.average_improvement.toFixed(1) : '—'}
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Antes {mood ? mood.average_mood_before.toFixed(1) : '—'} / Depois{' '}
-                {mood ? mood.average_mood_after.toFixed(1) : '—'}
-              </p>
-            </Card>
-            <Card compact>
-              <p className="text-sm text-gray-500">Tendência (30 dias)</p>
-              <p className="text-3xl font-bold">{trendLabel ?? '—'}</p>
-              <p className="mt-1 text-sm text-gray-500">
-                {progress?.data_points.length ?? 0} ponto(s) observados
-              </p>
-            </Card>
+            <MetricCard
+              label="Streak atual"
+              value={summary?.current_streak ?? 0}
+              helper={`Melhor streak: ${summary?.longest_streak ?? 0}`}
+            />
+            <MetricCard
+              label="Melhor retenção"
+              value={`${summary?.best_retention_time ?? userStats?.best_retention_time ?? 0}s`}
+              helper={`Média: ${Math.round(summary?.average_retention_time ?? 0)}s`}
+            />
+            <MetricCard
+              label="Humor médio"
+              value={mood ? mood.average_improvement.toFixed(1) : '—'}
+              helper={`Antes ${mood ? mood.average_mood_before.toFixed(1) : '—'} / Depois ${mood ? mood.average_mood_after.toFixed(1) : '—'}`}
+            />
+            <MetricCard
+              label="Tendência (30 dias)"
+              value={trendLabel ?? '—'}
+              helper={`${progress?.data_points.length ?? 0} ponto(s) observados`}
+            />
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">
-            <Card compact>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Resumo analítico</h2>
-                <Link to="/session" className="text-sm text-capy-primary hover:underline">
+            <SectionCard
+              title="Resumo analítico"
+              actions={
+                <Link
+                  to="/session"
+                  className="text-sm text-capy-primary hover:underline"
+                >
                   Ver histórico
                 </Link>
-              </div>
+              }
+            >
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded border p-3">
                   <p className="text-gray-500">Sessões totais</p>
-                  <p className="text-xl font-bold">{summary?.total_sessions ?? 0}</p>
+                  <p className="text-xl font-bold">
+                    {summary?.total_sessions ?? 0}
+                  </p>
                 </div>
                 <div className="rounded border p-3">
                   <p className="text-gray-500">Respirações totais</p>
-                  <p className="text-xl font-bold">{summary?.total_breaths ?? 0}</p>
+                  <p className="text-xl font-bold">
+                    {summary?.total_breaths ?? 0}
+                  </p>
                 </div>
                 <div className="rounded border p-3">
                   <p className="text-gray-500">Últimos 7 dias</p>
@@ -172,31 +206,33 @@ const DashboardPage = () => {
                   </p>
                 </div>
               </div>
-            </Card>
+            </SectionCard>
 
-            <Card compact>
-              <h2 className="mb-3 text-xl font-semibold">Personal Best</h2>
+            <SectionCard title="Personal Best">
               {personalBest ? (
                 <div className="space-y-2">
-                  <p className="text-3xl font-bold">{personalBest.retention_time}s</p>
+                  <p className="text-3xl font-bold">
+                    {personalBest.retention_time}s
+                  </p>
                   <p className="text-sm text-gray-500">
-                    {new Date(personalBest.session_date).toLocaleString('pt-BR')}
+                    {new Date(personalBest.session_date).toLocaleString(
+                      'pt-BR'
+                    )}
                   </p>
                   <p className="text-sm text-gray-600">
                     Técnica: {personalBest.technique_variant}
                   </p>
                 </div>
               ) : (
-                <p className="text-gray-600">Nenhum personal best disponível ainda.</p>
+                <EmptyState text="Nenhum personal best disponível ainda." />
               )}
-            </Card>
+            </SectionCard>
           </section>
 
           <section className="grid gap-6 lg:grid-cols-2">
-            <Card compact>
-              <h2 className="mb-3 text-xl font-semibold">Conquistas recentes</h2>
+            <SectionCard title="Conquistas recentes">
               {achievements.length === 0 ? (
-                <div>Nenhuma conquista encontrada.</div>
+                <EmptyState text="Nenhuma conquista encontrada." />
               ) : (
                 <ul className="flex flex-wrap gap-2">
                   {achievements.slice(0, 5).map(achievement => (
@@ -209,12 +245,11 @@ const DashboardPage = () => {
                   ))}
                 </ul>
               )}
-            </Card>
+            </SectionCard>
 
-            <Card compact>
-              <h2 className="mb-3 text-xl font-semibold">Sessões recentes</h2>
+            <SectionCard title="Sessões recentes">
               {sessions.length === 0 ? (
-                <div>Nenhuma sessão encontrada.</div>
+                <EmptyState text="Nenhuma sessão encontrada." />
               ) : (
                 <ul className="divide-y">
                   {sessions.map(session => (
@@ -229,17 +264,18 @@ const DashboardPage = () => {
                   ))}
                 </ul>
               )}
-            </Card>
+            </SectionCard>
           </section>
 
-          <Card compact>
-            <h2 className="mb-3 text-xl font-semibold">Progressão recente</h2>
+          <SectionCard title="Progressão recente">
             {progress?.data_points.length ? (
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {progress.data_points.slice(-4).map(point => (
                   <div key={point.date} className="rounded border p-3">
                     <p className="text-sm text-gray-500">{point.date}</p>
-                    <p className="text-lg font-bold">{point.best_retention_time}s</p>
+                    <p className="text-lg font-bold">
+                      {point.best_retention_time}s
+                    </p>
                     <p className="text-sm text-gray-600">
                       {point.sessions_count} sessão(ões)
                     </p>
@@ -247,12 +283,11 @@ const DashboardPage = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-600">Sem dados suficientes para progressão.</p>
+              <EmptyState text="Sem dados suficientes para progressão." />
             )}
-          </Card>
+          </SectionCard>
 
-          <Card compact>
-            <h2 className="mb-3 text-xl font-semibold">Personals bests recentes</h2>
+          <SectionCard title="Personals bests recentes">
             {recentPersonalBests.length ? (
               <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {recentPersonalBests.map(item => (
@@ -265,9 +300,9 @@ const DashboardPage = () => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-600">Nenhum personal best recente.</p>
+              <EmptyState text="Nenhum personal best recente." />
             )}
-          </Card>
+          </SectionCard>
         </>
       )}
     </PageContainer>
